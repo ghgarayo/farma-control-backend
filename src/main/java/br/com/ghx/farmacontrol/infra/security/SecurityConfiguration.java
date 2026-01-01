@@ -1,10 +1,12 @@
 package br.com.ghx.farmacontrol.infra.security;
 
+import br.com.ghx.farmacontrol.service.impl.UsuarioDetailsServiceImpl;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -16,13 +18,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfiguration {
 
     private final SecurityFilter securityFilter;
+    private final UsuarioDetailsServiceImpl usuarioDetailsService;
 
-    public SecurityConfiguration(SecurityFilter securityFilter) {
-        this.securityFilter = securityFilter;
-    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -37,7 +38,7 @@ public class SecurityConfiguration {
                     // Rotas Públicas (Login e Cadastro de Usuário)
                     auth.requestMatchers(HttpMethod.GET, "/api/hello").permitAll();
                     auth.requestMatchers(HttpMethod.POST, "/api/v1/user").permitAll();
-                    auth.requestMatchers(HttpMethod.POST, "/login").permitAll();
+                    auth.requestMatchers(HttpMethod.POST, "/api/v1/auth").permitAll();
 
                     // TODO: Rotas habilitadas para testes, remover
                     auth.requestMatchers(HttpMethod.PATCH,"/api/v1/user/activate/**").permitAll();
@@ -50,10 +51,11 @@ public class SecurityConfiguration {
                 .build();
     }
 
-    // Forma sênior de exportar o AuthenticationManager no Spring Boot 3
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
+    public AuthenticationManager authenticationManagerBean(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        authenticationManagerBuilder.userDetailsService(usuarioDetailsService).passwordEncoder(passwordEncoder());
+        return authenticationManagerBuilder.build();
     }
 
     @Bean
