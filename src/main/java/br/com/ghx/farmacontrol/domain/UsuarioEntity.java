@@ -54,7 +54,7 @@ public class UsuarioEntity extends BaseEntity implements UserDetails {
     @Column(nullable = false, length = 50)
     private EnumRoleType role;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private PessoaEntity person;
 
     @Override

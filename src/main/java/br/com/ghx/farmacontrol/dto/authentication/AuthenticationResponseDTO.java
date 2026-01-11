@@ -1,4 +1,6 @@
 package br.com.ghx.farmacontrol.dto.authentication;
 
-public record AuthenticationResponseDTO(String token) {
+import br.com.ghx.farmacontrol.dto.usuario.UsuarioOutputDTO;
+
+public record AuthenticationResponseDTO(String token, UsuarioOutputDTO usuario) {
 }
